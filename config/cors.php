@@ -6,7 +6,7 @@ return [
     'allowed_methods' => ['*'],
 
 'allowed_origins' => [
-    'https://coffeeshop-frontend.onrender.com',
+    'https://coffeeshop-frontend-67u0.onrender.com',
     'http://localhost:5173',
     'http://192.168.1.100:5173',
 ],
