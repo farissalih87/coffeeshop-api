@@ -25,7 +25,5 @@ EXPOSE 10000
 
 # Start Laravel server
 CMD php artisan serve --host=0.0.0.0 --port=10000
-```
 
-## Step 2 — Create `.dockerignore`
 
