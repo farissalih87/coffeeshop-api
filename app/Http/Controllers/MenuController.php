@@ -27,6 +27,13 @@ class MenuController extends Controller
 
         $items = $query->where('available', true)->orderBy('sort_order')->get();
 
+        $items->transform(function ($item) {
+            if ($item->image) {
+                $item->image = asset('storage/' . $item->image);
+            }
+            return $item;
+        });
+
         return response()->json(['items' => $items]);
     }
 
@@ -74,7 +81,7 @@ class MenuController extends Controller
             'price'           => 'required|numeric|min:0',
             'category_id'     => 'required|exists:categories,id',
             'available'       => 'boolean',
-            'image'           => 'nullable|image|max:2048',
+            'image'           => 'nullable|image|max:5120',
         ]);
 
         if ($request->hasFile('image')) {
@@ -82,7 +89,13 @@ class MenuController extends Controller
         }
 
         $item = MenuItem::create($data);
-        return response()->json(['item' => $item->load('category')], 201);
+        $item->load('category');
+
+        if ($item->image) {
+            $item->image = asset('storage/' . $item->image);
+        }
+
+        return response()->json(['item' => $item], 201);
     }
 
     public function updateItem(Request $request, MenuItem $item)
@@ -95,7 +108,7 @@ class MenuController extends Controller
             'price'           => 'sometimes|numeric|min:0',
             'category_id'     => 'sometimes|exists:categories,id',
             'available'       => 'boolean',
-            'image'           => 'nullable|image|max:2048',
+            'image'           => 'nullable|image|max:5120',
         ]);
 
         if ($request->hasFile('image')) {
@@ -103,8 +116,19 @@ class MenuController extends Controller
             $data['image'] = $request->file('image')->store('menu', 'public');
         }
 
+        if ($request->input('remove_image') == '1') {
+            if ($item->image) Storage::disk('public')->delete($item->image);
+            $data['image'] = null;
+        }
+
         $item->update($data);
-        return response()->json(['item' => $item->load('category')]);
+        $item->load('category');
+
+        if ($item->image) {
+            $item->image = asset('storage/' . $item->image);
+        }
+
+        return response()->json(['item' => $item]);
     }
 
     public function destroyItem(MenuItem $item)
